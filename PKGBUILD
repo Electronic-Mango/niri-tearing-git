@@ -1,7 +1,7 @@
 # Maintainer: urayde <urayde (at) ganyu.ru>
 
 pkgname=niri-tearing-git
-pkgver=26.04.r22.g43ce122
+pkgver=26.04.r33.gbc930f9
 pkgrel=1
 pkgdesc="Scrollable-tiling Wayland compositor (tearing fork)"
 arch=(x86_64 aarch64)
@@ -35,6 +35,11 @@ pkgver() {
 
 prepare() {
   cd "${pkgname}"
+  git config user.name "local"
+  git config user.email "<>"
+  git remote add upstream "https://github.com/niri-wm/niri.git"
+  git fetch upstream --tags
+  git rebase upstream
   export CARGO_HOME="${srcdir}/${pkgname}/.cargo"
   cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
 }
@@ -51,6 +56,7 @@ package() {
   cd "${pkgname}"
   install -Dm755 "target/release/niri" -t "${pkgdir}/usr/bin/"
   install -Dm755 "resources/niri-session" -t "${pkgdir}/usr/bin/"
+  install -Dm644 "resources/default-config.kdl" -t "${pkgdir}/usr/share/doc/niri"
   install -Dm644 "resources/niri.desktop" -t "${pkgdir}/usr/share/wayland-sessions/"
   install -Dm644 "resources/niri-portals.conf" -t "${pkgdir}/usr/share/xdg-desktop-portal/"
   install -Dm644 "resources/niri"{.service,-shutdown.target} -t "${pkgdir}/usr/lib/systemd/user/"
